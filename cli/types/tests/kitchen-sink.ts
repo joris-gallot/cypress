@@ -175,10 +175,10 @@ const a = 1
 a.should("be.visible")
 
 cy.wait('any').then(({ response }) => {
-  response // $ExpectType CyHttpMessages.IncomingResponse<any> | undefined
+  response?.body // $ExpectType any
 })
 
 
 cy.wait<{ foo: string }>('foo').then(({ response }) => {
-  response?.body // $ExpectType CyHttpMessages.IncomingResponse<{ foo: string; }> | undefined
+  response?.body // $ExpectType { foo: string; } | undefined
 })
