@@ -173,3 +173,12 @@ cy.window().then(window => {
 const a = 1
 // $ExpectError
 a.should("be.visible")
+
+cy.wait('any').then(({ response }) => {
+  response // $ExpectType CyHttpMessages.IncomingResponse<any> | undefined
+})
+
+
+cy.wait<{ foo: string }>('foo').then(({ response }) => {
+  response?.body // $ExpectType CyHttpMessages.IncomingResponse<{ foo: string; }> | undefined
+})

@@ -72,20 +72,20 @@ type Method =
 export type ResourceType = 'document' | 'fetch' | 'xhr' | 'websocket' | 'stylesheet' | 'script' | 'image' | 'font' | 'cspviolationreport' | 'ping' | 'manifest' | 'other'
 
 export namespace CyHttpMessages {
-  export interface BaseMessage {
+  export interface BaseMessage<Body = any> {
     /**
      * The body of the HTTP message.
      * If a JSON Content-Type was used and the body was valid JSON, this will be an object.
      * If the body was binary content, this will be a buffer.
      */
-    body: any
+    body: Body
     /**
      * The headers of the HTTP message.
      */
     headers: { [key: string]: string | string[] }
   }
 
-  export type IncomingResponse = BaseMessage & {
+  export type IncomingResponse<Body = any> = BaseMessage<Body> & {
     /**
      * The HTTP status code of the response.
      */
@@ -104,7 +104,7 @@ export namespace CyHttpMessages {
     delay?: number
   }
 
-  export type IncomingHttpResponse = IncomingResponse & {
+  export type IncomingHttpResponse<Body = any> = IncomingResponse<Body> & {
     /**
      * Continue the HTTP response, merging the supplied values with the real response.
      */
@@ -118,14 +118,14 @@ export namespace CyHttpMessages {
     /**
      * Wait for `delay` milliseconds before sending the response to the client.
      */
-    setDelay: (delay: number) => IncomingHttpResponse
+    setDelay: (delay: number) => IncomingHttpResponse<Body>
     /**
      * Serve the response at `throttleKbps` kilobytes per second.
      */
-    setThrottle: (throttleKbps: number) => IncomingHttpResponse
+    setThrottle: (throttleKbps: number) => IncomingHttpResponse<Body>
   }
 
-  export type IncomingRequest = BaseMessage & {
+  export type IncomingRequest<Body = any> = BaseMessage<Body> & {
     /**
      * Request HTTP method (GET, POST, ...).
      */
@@ -197,8 +197,8 @@ export namespace CyHttpMessages {
     redirect(location: string, statusCode?: number): void
   }
 
-  export interface ResponseComplete {
-    finalResBody?: BaseMessage['body']
+  export interface ResponseComplete<Body = any> {
+    finalResBody?: BaseMessage<Body>['body']
   }
 
   export interface NetworkError {
@@ -227,7 +227,7 @@ export type HttpRequestInterceptor = (req: CyHttpMessages.IncomingHttpRequest) =
  * request to the next handler (if there is one), otherwise the request will be passed to the next
  * handler synchronously.
  */
-export type HttpResponseInterceptor = (res: CyHttpMessages.IncomingHttpResponse) => void | Promise<void>
+export type HttpResponseInterceptor = <Body = any>(res: CyHttpMessages.IncomingHttpResponse<Body>) => void | Promise<void>
 
 /**
  * Matches a single number or any of an array of acceptable numbers.
@@ -266,13 +266,13 @@ interface RequestEvents {
    * Modifications to `res` have no impact.
    * If a promise is returned from `cb`, it will be awaited before processing other event handlers.
    */
-  on(eventName: 'after:response', cb: (res: CyHttpMessages.IncomingResponse) => void | Promise<void>): this
+  on(eventName: 'after:response', cb: <Body = any>(res: CyHttpMessages.IncomingResponse<Body>) => void | Promise<void>): this
 }
 
 /**
  * Request/response cycle.
  */
-export interface Interception {
+export interface Interception<Body = any> {
   id: string
   /* @internal */
   browserRequestId?: string
@@ -285,7 +285,7 @@ export interface Interception {
    * @internal
    */
   requestWaited: boolean
-  response?: CyHttpMessages.IncomingResponse
+  response?: CyHttpMessages.IncomingResponse<Body>
   /**
    * The error that occurred during this request.
    */
@@ -548,7 +548,7 @@ declare global {
       })
       ```
       */
-      wait(alias: string, options?: Partial<WaitOptions>): Chainable<Interception>
+      wait<Body = any>(alias: string, options?: Partial<WaitOptions>): Chainable<Interception<Body>>
       /**
        * Wait for list of requests to complete.
        *
